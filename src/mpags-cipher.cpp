@@ -3,6 +3,61 @@
 #include <string>
 #include <vector>
 
+
+std::string transformChar(const char in_char) {
+    /* transform letters to upper case and numbers to english words
+
+    const char in_char: the char that should be transformed
+
+    return: a string containing either the letter in upper case, or if the char
+    was a number, the english word for the number in upper case. chars that are 
+    neither letters nor numbers are ignored.
+    */
+
+    std::string inputText = "";
+
+    // letters to upper case
+    if (std::isalpha(in_char)) {
+        inputText += std::toupper(in_char);
+    }
+
+    // Transliterate digits to English words
+    switch (in_char) {
+        case '0':
+            inputText += "ZERO";
+            break;
+        case '1':
+            inputText += "ONE";
+            break;
+        case '2':
+            inputText += "TWO";
+            break;
+        case '3':
+            inputText += "THREE";
+            break;
+        case '4':
+            inputText += "FOUR";
+            break;
+        case '5':
+            inputText += "FIVE";
+            break;
+        case '6':
+            inputText += "SIX";
+            break;
+        case '7':
+            inputText += "SEVEN";
+            break;
+        case '8':
+            inputText += "EIGHT";
+            break;
+        case '9':
+            inputText += "NINE";
+            break;
+    }
+    
+    return inputText;
+}
+
 int main(int argc, char* argv[])
 {
     // Convert the command-line arguments into a more easily usable form
@@ -20,7 +75,7 @@ int main(int argc, char* argv[])
     for (std::size_t i{1}; i < nCmdLineArgs; ++i) {
         if (cmdLineArgs[i] == "-h" || cmdLineArgs[i] == "--help") {
             helpRequested = true;
-        } else if (cmdLineArgs[i] == "--version") {
+        } else if (cmdLineArgs[i] == "--version" || cmdLineArgs[i] == "-v") {
             versionRequested = true;
         } else if (cmdLineArgs[i] == "-i") {
             // Handle input file option
@@ -61,7 +116,7 @@ int main(int argc, char* argv[])
     if (helpRequested) {
         // Line splitting for readability
         std::cout
-            << "Usage: mpags-cipher [-h/--help] [--version] [-i <file>] [-o <file>]\n\n"
+            << "Usage: mpags-cipher [-h/--help] [-v/--version] [-i <file>] [-o <file>]\n\n"
             << "Encrypts/Decrypts input alphanumeric text using classical ciphers\n\n"
             << "Available options:\n\n"
             << "  -h|--help        Print this help message and exit\n\n"
@@ -98,49 +153,8 @@ int main(int argc, char* argv[])
     // loop over each character from user input
     while (std::cin >> inputChar) {
         // Uppercase alphabetic characters
-        if (std::isalpha(inputChar)) {
-            inputText += std::toupper(inputChar);
-            continue;
-        }
-
-        // Transliterate digits to English words
-        switch (inputChar) {
-            case '0':
-                inputText += "ZERO";
-                break;
-            case '1':
-                inputText += "ONE";
-                break;
-            case '2':
-                inputText += "TWO";
-                break;
-            case '3':
-                inputText += "THREE";
-                break;
-            case '4':
-                inputText += "FOUR";
-                break;
-            case '5':
-                inputText += "FIVE";
-                break;
-            case '6':
-                inputText += "SIX";
-                break;
-            case '7':
-                inputText += "SEVEN";
-                break;
-            case '8':
-                inputText += "EIGHT";
-                break;
-            case '9':
-                inputText += "NINE";
-                break;
-        }
-
-        // If the character isn't alphabetic or numeric, DONT add it
+        inputText += transformChar(inputChar);
     }
-
-    // Print out the transliterated text
 
     // Warn that output file option not yet implemented
     if (!outputFile.empty()) {
@@ -148,6 +162,7 @@ int main(int argc, char* argv[])
                   << "') not implemented yet, using stdout\n";
     }
 
+    // Print out the transliterated text
     std::cout << inputText << std::endl;
 
     // No requirement to return from main, but we do so for clarity
