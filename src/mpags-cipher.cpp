@@ -1,6 +1,8 @@
+#include <assert.h>
 #include <cctype>
 #include <iostream>
 #include <string>
+#include <tuple>
 #include <vector>
 
 
@@ -58,62 +60,68 @@ std::string transformChar(const char in_char) {
     return inputText;
 }
 
-int main(int argc, char* argv[])
-{
-    // Convert the command-line arguments into a more easily usable form
-    const std::vector<std::string> cmdLineArgs{argv, argv + argc};
-    const std::size_t nCmdLineArgs{cmdLineArgs.size()};
+std::tuple<bool, bool, std::string, std::string> processCommandLine(const std::vector<std::string> &args) {
+    /* deduce in/out file names, help/version number requests from command line arguments 
 
-    // Options that might be set by the command-line arguments
-    bool helpRequested{false};
-    bool versionRequested{false};
-    std::string inputFile{""};
-    std::string outputFile{""};
+    const std::vector<std::string> &args: command line arguments
 
-    // Process command line arguments - ignore zeroth element, as we know this
+    return: tuple in following order: 
+        help requested (bool), version requested (bool), infile (string&), outfile (string&)
+    */
+
+    bool helpRequested = false;
+    bool versionRequested = false;
+    std::string inputFile = "";
+    std::string outputFile = "";
+
+    //- ignore zeroth element, as we know this
     // to be the program name and don't need to worry about it
-    for (std::size_t i{1}; i < nCmdLineArgs; ++i) {
-        if (cmdLineArgs[i] == "-h" || cmdLineArgs[i] == "--help") {
+    for (std::size_t i{1}; i < args.size(); ++i) {
+        if (args[i] == "-h" || args[i] == "--help") {
             helpRequested = true;
-        } else if (cmdLineArgs[i] == "--version" || cmdLineArgs[i] == "-v") {
+        } else if (args[i] == "--version" || args[i] == "-v") {
             versionRequested = true;
-        } else if (cmdLineArgs[i] == "-i") {
+        } else if (args[i] == "-i") {
             // Handle input file option
             // Next element is filename unless "-i" is the last argument
-            if (i == nCmdLineArgs - 1) {
+            if (i == args.size() - 1) {
                 std::cerr << "[error] -i requires a filename argument"
                           << std::endl;
                 // exit main with non-zero return to indicate failure
-                return 1;
+                exit(1);
             } else {
                 // Got filename, so assign value and advance past it
-                inputFile = cmdLineArgs[i + 1];
+                inputFile = args[i + 1];
                 ++i;
             }
-        } else if (cmdLineArgs[i] == "-o") {
+        } else if (args[i] == "-o") {
             // Handle output file option
             // Next element is filename unless "-o" is the last argument
-            if (i == nCmdLineArgs - 1) {
+            if (i == args.size() - 1) {
                 std::cerr << "[error] -o requires a filename argument"
                           << std::endl;
                 // exit main with non-zero return to indicate failure
-                return 1;
+                exit(1);
             } else {
                 // Got filename, so assign value and advance past it
-                outputFile = cmdLineArgs[i + 1];
+                outputFile = args[i + 1];
                 ++i;
             }
         } else {
             // Have an unknown flag to output error message and return non-zero
             // exit status to indicate failure
-            std::cerr << "[error] unknown argument '" << cmdLineArgs[i]
+            std::cerr << "[error] unknown argument '" << args[i]
                       << "'\n";
-            return 1;
+            exit(1);
         }
     }
+    assert((inputFile != "") && "No input file provided. Use -i option to specify.");
+    assert((outputFile != "") && "No output file provided. Use -o option to specify.");
 
-    // Handle help, if requested
-    if (helpRequested) {
+    return std::make_tuple(helpRequested, versionRequested, inputFile, outputFile);
+}
+
+void provideHelp() {
         // Line splitting for readability
         std::cout
             << "Usage: mpags-cipher [-h/--help] [-v/--version] [-i <file>] [-o <file>]\n\n"
@@ -128,15 +136,35 @@ int main(int argc, char* argv[])
             << std::endl;
         // Help requires no further action, so return from main
         // with 0 used to indicate success
-        return 0;
-    }
+        exit(0);
+}
 
-    // Handle version, if requested
-    // Like help, requires no further action,
-    // so return from main with zero to indicate success
+void provideVersion() {
+        std::cout << "1.0.0" << std::endl;
+        exit(0);
+}
+
+int main(int argc, char* argv[])
+{
+    // Convert the command-line arguments into a more easily usable form
+    const std::vector<std::string> cmdLineArgs{argv, argv + argc};
+    //const std::size_t nCmdLineArgs{cmdLineArgs.size()};
+
+    // Options that might be set by the command-line arguments
+    bool helpRequested{false};
+    bool versionRequested{false};
+    std::string inputFile{""};
+    std::string outputFile{""};
+
+    // Process command line arguments 
+    std::tie(helpRequested, versionRequested, inputFile, outputFile) = processCommandLine(cmdLineArgs);
+
+    // provide help if requested (or version number if requested) 
+    if (helpRequested) {
+        provideHelp();
+    }
     if (versionRequested) {
-        std::cout << "0.1.0" << std::endl;
-        return 0;
+        provideVersion();
     }
 
     // Initialise variables
