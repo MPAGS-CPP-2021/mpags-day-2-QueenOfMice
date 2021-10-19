@@ -22,6 +22,8 @@ int main(int argc, char* argv[])
     // Process command line arguments 
     std::tie(helpRequested, versionRequested, inputFile, outputFile) = processCommandLine(cmdLineArgs);
 
+    std::cout << inputFile << " " << outputFile << std::endl;
+
     // provide help if requested (or version number if requested) 
     if (helpRequested) {
         provideHelp();
@@ -32,29 +34,45 @@ int main(int argc, char* argv[])
 
     // Initialise variables
     char inputChar{'x'};
-    std::string inputText;
+    std::string inputText = "";
 
     // Read in user input from stdin/file
-    // Warn that input file option not yet implemented
-    if (!inputFile.empty()) {
+    // Warn if input file not provided, and use input from cmd line instead
+    // (note that I canged if not to if)
+    if (inputFile.empty()) {
         std::cerr << "[warning] input from file ('" << inputFile
-                  << "') not implemented yet, using stdin\n";
+                  << "') not opened, using stdin\n";
+        // loop over each character from user input
+        while (std::cin >> inputChar) {
+            // Uppercase alphabetic characters
+            inputText += transformChar(inputChar);
+        }
+    }
+    
+    // if input file not empy, read input and transform
+    std::ifstream in(inputFile);
+    // if successful, transliterate
+    if (in) {
+        while (in.get(inputChar)) {
+            inputText += transformChar(inputChar);
+        }
     }
 
-    // loop over each character from user input
-    while (std::cin >> inputChar) {
-        // Uppercase alphabetic characters
-        inputText += transformChar(inputChar);
-    }
-
-    // Warn that output file option not yet implemented
-    if (!outputFile.empty()) {
+    // Warn if output file is not provided, and write to console instead
+    // (note that I canged if not to if)
+    if (outputFile.empty()) {
         std::cerr << "[warning] output to file ('" << outputFile
-                  << "') not implemented yet, using stdout\n";
+                  << "') not saved, using stdout\n";
+        // Print out the transliterated text
+        std::cout << inputText << std::endl;
+        return 0;
     }
 
-    // Print out the transliterated text
-    std::cout << inputText << std::endl;
+    // if output file is there, write to it
+    std::ofstream outf(outputFile);
+    if (outf) {
+        outf << inputText;
+    }
 
     // No requirement to return from main, but we do so for clarity
     // and for consistency with other functions
