@@ -5,6 +5,7 @@
 
 #include "TransformChar.hpp"
 #include "ProcessCommandLine.hpp"
+#include "RunCaesarCipher.hpp"
 
 
 int main(int argc, char* argv[])
@@ -57,6 +58,9 @@ int main(int argc, char* argv[])
             inputText += transformChar(inputChar);
         }
     }
+
+    // ceasar cipher
+    inputText = runCaesarCipher(inputText, 5, true);
 
     // Warn if output file is not provided, and write to console instead
     // (note that I canged if not to if)
